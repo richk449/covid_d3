@@ -1,4 +1,4 @@
-import numpy as np
+
 import requests
 
 filename = "time_series_covid19_confirmed_global_raw.csv"
@@ -16,6 +16,7 @@ showPlots = False
 
 if(makePlots):
     import matplotlib.pylab as pl
+    import numpy as np
 
 
 #===============================================================
@@ -40,10 +41,10 @@ with open(filename) as f:
         data = line.strip().split(",")
         if(data[0] != ""):
             name = "_".join(data[0:2])
-            regionDict[name] = np.array([int(x) for x in data[4:]])
+            regionDict[name] = [int(x) for x in data[4:]]
         else:
             name = data[1]
-            countryDict[name] = np.array([int(x) for x in data[4:]])
+            countryDict[name] = [int(x) for x in data[4:]]
             
         
         
@@ -54,7 +55,8 @@ for name in regionDict:
     
     if((name.split("_")[1] in countryDict) == False):
         if(name.split("_")[1]+"*" in countryDict):
-            countryDict[name.split("_")[1]+"*"] = countryDict[name.split("_")[1]+"*"] + regionDict[name]
+            for i in range(len(countryDict[name.split("_")[1]+"*"])):
+                countryDict[name.split("_")[1]+"*"][i] = countryDict[name.split("_")[1]+"*"][i] + regionDict[name][i]
         else:
             countryDict[name.split("_")[1]+"*"] = regionDict[name]
             print("creating ", name.split("_")[1], " from subregions")
