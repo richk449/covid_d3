@@ -21,7 +21,7 @@
     <script type="text/javascript">
 
         var margin = {top: 10, right: 40, bottom: 30, left: 30},
-            width = 700 - margin.left - margin.right,
+            width = 800 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
 
         var svG = d3.select("#scatter_area")
@@ -263,11 +263,11 @@
               .enter()
                 .append('g')
                 .append("text")
-                  .attr('x', function(d,i){ return 30 + i*0})
-                  .attr('y', function(d,i){ return 30 + i*10})
+                  .attr('x', function(d,i){ return 15 + i*0})
+                  .attr('y', function(d,i){ return 15 + i*12})
                   .text(function(d) { return d.name; })
                   .style("fill", function(d){ return myColor(d.name) })
-                  .style("font-size", 6)
+                  .style("font-size", 8)
                 .on("click", function(d){
                   // is the element currently visible ?
                   currentOpacity = d3.selectAll("." + d.name).style("opacity")
