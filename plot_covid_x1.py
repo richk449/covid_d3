@@ -1,6 +1,11 @@
 import matplotlib.pylab as pl
 import numpy as np
-filename = "time_series_covid19_confirmed_global.csv"
+import requests
+
+filename = "time_series_covid19_confirmed_global_raw.csv"
+filenameOut = "time_series_covid19_confirmed_global.csv"
+filePath = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+
 
 figsize = [12,8]
 legendFontsize = 6
@@ -11,6 +16,14 @@ makePlots = False
 showPlots = False
 
 #===============================================================
+# get latest file
+#===============================================================
+r = requests.get(filePath)
+with open(filename, 'w') as f:
+    for line in r.text:
+        f.write(line)
+
+#===============================================================
 # load in data file
 #===============================================================
 
@@ -19,6 +32,8 @@ regionDict = {}
 with open(filename) as f:
     headers = f.readline()
     for line in f.readlines():
+        line = line.replace("\"Korea, South\"", "South Korea")
+        line = line.replace("\"Bonaire, Sint Eustatius and Saba\"", "Sint Eustatius and Saba Bonaire")
         data = line.strip().split(",")
         if(data[0] != ""):
             name = "_".join(data[0:2])
@@ -27,7 +42,8 @@ with open(filename) as f:
             name = data[1]
             countryDict[name] = np.array([int(x) for x in data[4:]])
             
-            
+        
+        
 #===============================================================
 # do some cleanup to make countries for those that don't have them
 #===============================================================
@@ -40,6 +56,17 @@ for name in regionDict:
             countryDict[name.split("_")[1]+"*"] = regionDict[name]
             print("creating ", name.split("_")[1], " from subregions")
 
+#===============================================================
+# write out data file
+#===============================================================
+with open(filenameOut,'w') as f:
+    f.write(headers)
+    for name in countryDict:
+        output = "{},{},{},{}".format("",name, 0.0, 0.0)
+        for value in countryDict[name]:
+            output = output + ",{}".format(value)
+        output = output + "\n"
+        f.write(output)
 
 #===============================================================
 # plot
