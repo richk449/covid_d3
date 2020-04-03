@@ -1,4 +1,3 @@
-import matplotlib.pylab as pl
 import numpy as np
 import requests
 
@@ -14,6 +13,10 @@ normValueConfirmedCountry = 1000
 
 makePlots = False
 showPlots = False
+
+if(makePlots):
+    import matplotlib.pylab as pl
+
 
 #===============================================================
 # get latest file
