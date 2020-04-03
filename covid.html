@@ -49,7 +49,6 @@
 
         var dataDict = {}
         
-        
         d3.csv(dataFilename).then(function(data) {
             data.forEach(function(d, index) {
                 //console.log("pushing " + d + " index = " + index);
@@ -67,7 +66,6 @@
                         
                     });
                 })
-            //console.log(dataDict);
             plot(dataDict)
             });
 
@@ -266,10 +264,10 @@
                 .append('g')
                 .append("text")
                   .attr('x', function(d,i){ return 30 + i*0})
-                  .attr('y', function(d,i){ return 30 + i*12})
+                  .attr('y', function(d,i){ return 30 + i*10})
                   .text(function(d) { return d.name; })
                   .style("fill", function(d){ return myColor(d.name) })
-                  .style("font-size", 8)
+                  .style("font-size", 6)
                 .on("click", function(d){
                   // is the element currently visible ?
                   currentOpacity = d3.selectAll("." + d.name).style("opacity")
