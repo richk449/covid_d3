@@ -2,9 +2,11 @@
 import requests
 
 filename = "time_series_covid19_confirmed_global_raw.csv"
-filenameOut = "time_series_covid19_confirmed_global.csv"
 filePath = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+filenameOut = "time_series_covid19_confirmed_global.csv"
+filenameOutOverPop = "time_series_covid19_confirmed_global_over_pop.csv"
 
+populationFile = "API_SP.POP.TOTL_DS2_en_csv_v2_887275_rk1.csv"
 
 figsize = [12,8]
 legendFontsize = 6
@@ -46,7 +48,26 @@ with open(filename) as f:
             name = data[1]
             countryDict[name] = [int(x) for x in data[4:]]
             
-        
+
+#===============================================================
+# load in population file
+#===============================================================
+popDict = {}
+with open(populationFile) as f:
+    for i in range(4):
+        f.readline()
+    header = f.readline()
+    for line in f.readlines():
+        data = line.strip().split(",")
+        if(data[0] != ""):
+            name = data[0].strip("\"")
+            i = 1
+            while (i < 10):
+                pop = data[-1-i].strip("\"")
+                if(pop != ""):
+                    popDict[name] = int(pop)
+                    i = 11
+                i = i + 1
         
 #===============================================================
 # do some cleanup to make countries for those that don't have them
@@ -70,6 +91,24 @@ with open(filenameOut,'w') as f:
         output = "{},{},{},{}".format("",name, 0.0, 0.0)
         for value in countryDict[name]:
             output = output + ",{}".format(value)
+        output = output + "\n"
+        f.write(output)
+
+#===============================================================
+# write out over population data file
+#===============================================================
+with open(filenameOutOverPop,'w') as f:
+    f.write(headers)
+    for name in countryDict:
+        nameClean = name.strip("*")
+        if(nameClean in popDict):
+            scale = popDict[nameClean]
+        else:
+            print("can't find {} in popDict".format(nameClean))
+            scale = 1e9
+        output = "{},{},{},{}".format("",name, 0.0, 0.0)
+        for value in countryDict[name]:
+            output = output + ",{}".format(value/scale)
         output = output + "\n"
         f.write(output)
 

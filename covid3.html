@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<!-- data from: https://github.com/CSSEGISandData -->
+<html>
+  <head>
+    <!-- <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
+    <script src="d3.js" charset="utf-8"></script>
+    <script src="d3-tip.js"></script>
+  </head>
+  <body>
+    <!--<svg width='200' height='500'></svg>-->
+    <div id="scatter_area"></div>
+    <!-- Circle are black when hovered-->
+    <style>
+    .myCircle:hover {
+      stroke: black;
+    }
+    </style>
+    <script type="text/javascript">
+
+        var margin = {top: 20, right: 40, bottom: 40, left: 70},
+            width = 800 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        var svG = d3.select("#scatter_area")
+            .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")");
+
+        // ================================================================================
+        // Options
+        // ================================================================================
+        var dataFilename = "time_series_covid19_confirmed_global.csv"
+        //var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
+        //var dataFilename = "http://localhost:9000/time_series_covid19_confirmed_global_2020-03-31.csv"
+        //var dataFilename = "http://localhost:9000/short.csv"
+
+        var thresholdToPlot = 5000
+        var thresholdToNormalize = 1000
+        var normalize = true
+        
+        minValueToPlot = 1 // 1 for cases, small number for cases normalized by population
+        
+        yAxisFormat = "d" //for raw cases
+        //yAxisFormat = "4.4e" //for cases over population
+        
+        maxY = 60
+        legendX = 0.8*width
+        
+        //yLabel = "Cases / Population"
+        yLabel = "Cases"
+        
+        maxNum = 45
+        
+        // ================================================================================
+        // Load the data, then call plot
+        // ================================================================================
+
+        var dataDict = {}
+        var lastDate = ""
+        d3.csv(dataFilename).then(function(data) {
+            data.forEach(function(d, index) {
+                
+                //console.log("pushing " + d + " index = " + index);
+                Object.keys(d).forEach(function(dkey, dindex) {
+                    
+                    if(index == 1) {
+                        lastDate = dkey;
+                        }
+                    
+                    if(dindex == 1) {
+                        name = d[dkey];
+                        name = name.replace(/\s+/g, '')
+                        name = name.replace('*', '')
+                        
+                        dataDict[name] = []; 
+                        //console.log("adding " + name);
+                        
+                        }
+                    else if(dindex > 6) {
+                        dataDict[name].push(d[dkey]);
+                        }
+                        
+                    });
+                })
+            plot(dataDict)
+            });
+
+        // ================================================================================
+        // This is the main function that does the plotting
+        // ================================================================================
+
+        function plot (dataDict) {
+            
+            // ================================================================================
+            // Put the data into the plotting format
+            // ================================================================================
+            dataDictToPlot = []
+            Object.keys(dataDict).forEach(function(key) {
+                
+                //find the offset
+                if(normalize) {
+                    for (let [index, value] of dataDict[key].entries()) {
+                        if(value > thresholdToNormalize) {
+                            offsetDays = index;
+                            break;
+                            }
+                        }
+                    }
+                else {
+                    offsetDays = 0;
+                    }
+                max = Math.max(...dataDict[key])
+                if(max > thresholdToPlot) {
+                    console.log("adding " + key)
+                    temp = []
+                    for (let [index, value] of dataDict[key].entries()) {
+                        if (value >= minValueToPlot) {
+                            temp.push({x:index-offsetDays, y:value})
+                            }
+                        }
+                    dataDictToPlot.push({"name":key, "values":temp})
+                    }
+                });
+            
+
+            // ================================================================================
+            // Set up colors
+            // ================================================================================
+            nameList = dataDictToPlot.map(x => x.name);
+            //console.log(nameList)
+            var myColor = d3.scaleOrdinal()
+              .domain(nameList)
+              .range(d3.schemeSet2);
+            
+
+            // ================================================================================
+            // Make axes
+            // ================================================================================
+            var x = d3.scaleLinear()
+                .domain([0, maxY])         // This is the min and the max of the data: 0 to 100 if percentages
+                .range([0, width]);       // This is the corresponding value I want in Pixel
+
+            svG
+              .append('g')
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(x));
+
+            maxVal = 0.0
+            Object.keys(dataDict).forEach(function(key) {
+                m = Math.max(...dataDict[key])
+                if(m > maxVal) {
+                    maxVal = m
+                    }
+                })
+            console.log("maxVal = ", maxVal)
+            
+            var minY = (normalize) ? thresholdToNormalize : minValueToPlot
+            console.log("minY " + minY)
+            // Y scale and Axis
+            var y = d3.scaleLog()
+                .domain([minY, maxVal])         // This is the min and the max of the data: 0 to 100 if percentages
+                .range([height, 0]);       // This is the corresponding value I want in Pixel
+            svG
+              .append('g')
+              .call(d3.axisLeft(y)
+                .tickFormat(d3.format(yAxisFormat)));
+            
+            // ================================================================================
+            // Make lines
+            // ================================================================================
+            var line = d3.line()
+              .x(function(d) { return x(+d.x) })
+              .y(function(d) { return y(+d.y) })
+            svG.selectAll("myLines")
+              .data(dataDictToPlot)
+              .enter()
+              .append("path")
+                .attr("class", function(d){ return d.name })
+                .attr("d", function(d){ return line(d.values) } )
+                .attr("stroke", function(d){ return myColor(d.name) })
+                .style("stroke-width", 2)
+                .style("fill", "none")
+
+            // ================================================================================
+            // Make tooltip
+            // ================================================================================
+            var Tooltip = d3.select("#scatter_area")
+              .append("div")
+              .style("opacity", 0)
+              //.attr("class", "tooltip")
+              .attr("class", "d3-tip")
+              
+              .style("background-color", "white")
+              .style("border", "solid")
+              .style("border-width", "2px")
+              .style("border-radius", "5px")
+              .style("padding", "5px")
+
+              // Three function that change the tooltip when user hover / move / leave a cell
+              var mouseover = function(d) {
+                //console.log("mouseover")
+                //console.log(d3.mouse(this)[0])
+                Tooltip
+                  .style("opacity", 1)
+              }
+              var mousemove = function(d) {
+                //console.log("mousemove")
+                Tooltip
+                  .html("Exact value: " + d.y)
+                  //.html("Exact value: ")
+                  .style("left", (d3.mouse(this)[0]+70) + "px")
+                  .style("top", (d3.mouse(this)[1]) + "px")
+              }
+              var mouseleave = function(d) {
+                //console.log("mouseleave")
+                Tooltip
+                  .style("opacity", 0)
+              }
+
+
+            // Create Tooltips
+            var tip = d3.tip().attr('class', 'd3-tip').direction('e').offset([0,5])
+                .html(function(d) {
+                    var content = "<span style='margin-left: 2.5px;'><b>" + d.y + "</b></span><br>";
+                    //content += "test"
+                    return content;
+                });
+            svG.call(tip);
+            
+            // ================================================================================
+            // Make points
+            // ================================================================================
+            svG
+              .selectAll("whatever")
+              .data(dataDictToPlot)
+              .enter()
+                .append('g')
+                .style("fill", function(d){ return myColor(d.name) })
+                .attr("class", function(d){ return d.name })
+              .selectAll("myPoints")
+                .data(function(d) {return d.values})
+                .enter()
+                .append("circle")
+                    .attr("cx", function(d){ return x(d.x) })
+                    .attr("cy", function(d){ return y(d.y) })
+                    .attr("r", 3)
+                    .attr("stroke", "white")
+                    //.on("mouseover", mouseover)
+                    //.on("mousemove", mousemove)
+                    //.on("mouseleave", mouseleave)   
+                    .on('mouseover', tip.show)
+                    .on('mouseout', tip.hide);
+                    
+
+            // ================================================================================
+            // Make labels
+            // ================================================================================
+            svG
+              .selectAll("labels")
+              .data(dataDictToPlot)
+              .enter()
+                .append("g")
+                .append("text")
+                .attr("class", function(d){ return d.name })
+                .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+                //.attr("transform", function(d) { return "translate(" + x(15) + "," + y(20) + ")"; })
+                .attr("transform", function(d) { return "translate(" + x(d.value.x) + "," + y(d.value.y) + ")"; })
+                //.attr("transform", function(d) { return "translate(" + x(d.value.x) + "," + y(d.value.y) + ")"; })
+                .attr("x", 10)
+                .text(function(d) { return d.name; })
+                .style("fill", function(d){ return myColor(d.name) })
+                .style("font-size", "10px")
+                .style("font-family", "sans-serif")
+                .on("click", function(d){
+                  // is the element currently visible ?
+                  currentOpacity = d3.selectAll("." + d.name).style("opacity")
+                  // Change the opacity: from 0 to 1 or from 1 to 0
+                  d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+                    })
+                
+            // ================================================================================
+            // Make legend
+            // ================================================================================
+            svG
+              .selectAll("myLegend")
+              .data(dataDictToPlot)
+              .enter()
+                .append('g')
+                .append("text")
+                  .attr('x', function(d,i){ return legendX})
+                  .attr('y', function(d,i){ return 25 + i*15})
+                  .text(function(d) { return d.name; })
+                  .style("fill", function(d){ return myColor(d.name) })
+                  .style("font-size", "8px")
+                  .style("font-family", "sans-serif")
+                  //.style("opacity",function(d){d3.selectAll("." + d.name).style("opacity")})
+                .on("click", function(d){
+                  // is the element currently visible ?
+                  currentOpacity = d3.selectAll("." + d.name).style("opacity")
+                  // Change the opacity: from 0 to 1 or from 1 to 0
+                  d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+                    
+                    });
+                    
+            svG
+              .append('g')
+              .append("text")
+                .attr('x', legendX)
+                .attr('y', "10px")
+                .text("Click to Hide")
+                .style("font-size", "8px")
+                .style("font-family", "sans-serif")
+            
+            // ================================================================================
+            // Axis labels
+            // ================================================================================
+            
+            svG
+              .append('g')
+              .append("text")
+                .attr('x', 0.45*width)
+                .attr('y', height+30)
+                .text("Days")
+                .style("font-size", "8px")
+                .style("font-family", "sans-serif")
+            
+            svG
+              .append('g')
+              .append("text")
+                .attr("transform", "translate(-55,"+0.5*height+")rotate(-90)")
+                .text(yLabel)
+                .style("font-size", "8px")
+                .style("font-family", "sans-serif")
+            
+            // ================================================================================
+            // Put some labels on graph
+            // ================================================================================
+            titleString = yLabel
+            if(normalize) {
+                titleString = titleString + " Normalized to " + thresholdToNormalize
+                }
+            svG
+              .append('g')
+              .append("text")
+                .attr('x', 0.02*width)
+                .attr('y', 0)
+                .text(titleString)
+                .style("font-size", "8px")
+                .style("font-family", "sans-serif")
+
+            svG
+              .append('g')
+              .append("text")
+                .attr('x', 0.6*width)
+                .attr('y', height-35)
+                .text("Updated: " + lastDate)
+                .style("font-size", "10px")
+                .style("font-family", "sans-serif")
+
+            svG
+              .append('g')
+              .append("text")
+                .attr('x', 0.6*width)
+                .attr('y', height-15)
+                .text("https://github.com/CSSEGISandData")
+                .style("font-size", "10px")
+                .style("font-family", "sans-serif")
+            
+            
+            
+            
+            return 0;
+            }
+
+            
+    </script>
+    
+  </body>
+</html>
+
