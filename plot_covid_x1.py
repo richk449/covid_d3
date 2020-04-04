@@ -53,7 +53,7 @@ with open(filename) as f:
 # load in population file
 #===============================================================
 popDict = {}
-with open(populationFile) as f:
+with open(populationFile, encoding="utf-8") as f:
     for i in range(4):
         f.readline()
     header = f.readline()
