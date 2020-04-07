@@ -9,8 +9,10 @@
   </head>
   <body>
     <!--<svg width='200' height='500'></svg>-->
-    <div id="confirmed"></div>
+    <div id="confirmed_raw"></div>
     <div id="confirmed_over_pop"></div>
+    <div id="deaths_raw"></div>
+    <div id="deaths_over_pop"></div>
     
     <!-- Circle are black when hovered-->
     <style>
@@ -20,10 +22,6 @@
     </style>
     <script type="text/javascript">
 
-
-
-
-        
         // ================================================================================
         // Load the data, then call plot
         // ================================================================================
@@ -35,7 +33,7 @@
             width = 800 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
 
-            var svG = d3.select("#confirmed")
+            var svG = d3.select(divId)
                 .append("svg")
                     .attr("width", width + margin.left + margin.right)
                     .attr("height", height + margin.top + margin.bottom)
@@ -174,7 +172,7 @@
                 // ================================================================================
                 // Make tooltip
                 // ================================================================================
-                var Tooltip = d3.select("#confirmed")
+                var Tooltip = d3.select(divId)
                   .append("div")
                   .style("opacity", 0)
                   //.attr("class", "tooltip")
@@ -360,6 +358,7 @@
                 return 0;
                 }
             }
+
             // ================================================================================
             // Confirmed
             // ================================================================================
@@ -376,10 +375,9 @@
             yLabel = "Cases"
             maxNum = 45
             numDecimalsTips = 0
-            divId = "#confirmed"
+            divId = "#confirmed_raw"
             makePlot(dataFilename, thresholdToPlot, thresholdToNormalize, normalize, 
             minValueToPlot, yAxisFormat, maxY, yLabel, maxNum, divId, numDecimalsTips)
-            
             
             // ================================================================================
             // Confirmed over population
@@ -392,22 +390,58 @@
             var normalize = true
             
             minValueToPlot = 0.00001 // 1 for cases, small number for cases normalized by population
-            
-            //yAxisFormat = "d" //for raw cases
             yAxisFormat = "4.4e" //for cases over population
-            
             maxY = 60
-            
-            
-            //yLabel = "Cases / Population"
             yLabel = "Cases / Population"
-            
             maxNum = 45
             numDecimalsTips = 5
             divId = "#confirmed_over_pop"
+
             makePlot(dataFilename, thresholdToPlot, thresholdToNormalize, normalize, 
             minValueToPlot, yAxisFormat, maxY, yLabel, maxNum, divId, numDecimalsTips)
             
+            // ================================================================================
+            // Deaths
+            // ================================================================================
+            var dataFilename = "time_series_covid19_deaths_global.csv"
+            //var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
+
+            var thresholdToPlot = 1000
+            var thresholdToNormalize = 100
+            var normalize = true
+            
+            minValueToPlot = 1 // 1 for cases, small number for cases normalized by population           
+            yAxisFormat = "d" //for raw 
+            maxY = 60
+            yLabel = "Deaths"
+            maxNum = 45
+            numDecimalsTips = 0
+            divId = "#deaths_raw"
+
+            makePlot(dataFilename, thresholdToPlot, thresholdToNormalize, normalize, 
+            minValueToPlot, yAxisFormat, maxY, yLabel, maxNum, divId, numDecimalsTips)
+
+            // ================================================================================
+            // Deaths over population
+            // ================================================================================
+            var dataFilename = "time_series_covid19_deaths_global_over_pop.csv"
+
+            var thresholdToPlot = 0.00003
+            var thresholdToNormalize = 0.00001
+            var normalize = true
+            
+            minValueToPlot = 0.000001 // 1 for cases, small number for cases normalized by population
+            yAxisFormat = "4.4e" //for cases over population
+            maxY = 60
+            yLabel = "Deaths / Population"
+            maxNum = 45
+            numDecimalsTips = 5
+            divId = "#deaths_over_pop"
+
+            makePlot(dataFilename, thresholdToPlot, thresholdToNormalize, normalize, 
+            minValueToPlot, yAxisFormat, maxY, yLabel, maxNum, divId, numDecimalsTips)
+
+
     </script>
     
   </body>
