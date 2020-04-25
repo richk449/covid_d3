@@ -13,6 +13,8 @@
     <div id="confirmed_over_pop"></div>
     <div id="deaths_raw"></div>
     <div id="deaths_over_pop"></div>
+    <div id="conf_death_compare"></div>
+    
     
     <!-- Circle are black when hovered-->
     <style>
@@ -41,7 +43,7 @@
                     .attr("transform",
                         "translate(" + margin.left + "," + margin.top + ")");
         
-            legendX = 0.8*width
+            legendX = 0.92*width
         
             var dataDict = {}
             var lastDate = ""
@@ -78,6 +80,13 @@
             // ================================================================================
 
             function plot (dataDict) {
+                
+                
+                // ================================================================================
+                // More Options
+                // ================================================================================
+                var dataPointSize = 2
+                dataLineWidth = 1.5
                 
                 // ================================================================================
                 // Put the data into the plotting format
@@ -166,7 +175,7 @@
                     .attr("class", function(d){ return d.name })
                     .attr("d", function(d){ return line(d.values) } )
                     .attr("stroke", function(d){ return myColor(d.name) })
-                    .style("stroke-width", 2)
+                    .style("stroke-width", dataLineWidth)
                     .style("fill", "none")
 
                 // ================================================================================
@@ -232,7 +241,7 @@
                     .append("circle")
                         .attr("cx", function(d){ return x(d.x) })
                         .attr("cy", function(d){ return y(d.y) })
-                        .attr("r", 3)
+                        .attr("r", dataPointSize)
                         .attr("stroke", "white")
                         //.on("mouseover", mouseover)
                         //.on("mousemove", mousemove)
@@ -360,18 +369,24 @@
             }
 
             // ================================================================================
+            // Variables that apply to all charts
+            // ================================================================================
+            var maxY = 110
+
+
+            // ================================================================================
             // Confirmed
             // ================================================================================
             var dataFilename = "time_series_covid19_confirmed_global.csv"
             //var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
 
-            var thresholdToPlot = 7000
+            var thresholdToPlot = 15000
             var thresholdToNormalize = 1000
             var normalize = true
             
             minValueToPlot = 1 // 1 for cases, small number for cases normalized by population           
             yAxisFormat = "d" //for raw cases
-            maxY = 60
+            
             yLabel = "Cases"
             maxNum = 45
             numDecimalsTips = 0
@@ -385,13 +400,13 @@
             //var dataFilename = "time_series_covid19_confirmed_global.csv"
             var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
 
-            var thresholdToPlot = 0.0008
+            var thresholdToPlot = 0.0015
             var thresholdToNormalize = 0.00001
             var normalize = true
             
             minValueToPlot = 0.00001 // 1 for cases, small number for cases normalized by population
             yAxisFormat = "4.4e" //for cases over population
-            maxY = 60
+            
             yLabel = "Cases / Population"
             maxNum = 45
             numDecimalsTips = 5
@@ -412,7 +427,7 @@
             
             minValueToPlot = 1 // 1 for cases, small number for cases normalized by population           
             yAxisFormat = "d" //for raw 
-            maxY = 60
+            
             yLabel = "Deaths"
             maxNum = 45
             numDecimalsTips = 0
@@ -432,7 +447,7 @@
             
             minValueToPlot = 0.000001 // 1 for cases, small number for cases normalized by population
             yAxisFormat = "4.4e" //for cases over population
-            maxY = 60
+            
             yLabel = "Deaths / Population"
             maxNum = 45
             numDecimalsTips = 5
