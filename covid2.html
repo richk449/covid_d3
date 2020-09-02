@@ -380,8 +380,8 @@
             var dataFilename = "time_series_covid19_confirmed_global.csv"
             //var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
 
-            var thresholdToPlot = 80000
-            var thresholdToNormalize = 1000
+            var thresholdToPlot = 120000
+            var thresholdToNormalize = 10000
             var normalize = true
             
             minValueToPlot = 1 // 1 for cases, small number for cases normalized by population           
@@ -401,10 +401,10 @@
             var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
 
             var thresholdToPlot = 0.0080
-            var thresholdToNormalize = 0.00001
+            var thresholdToNormalize = 0.0001
             var normalize = true
             
-            minValueToPlot = 0.00001 // 1 for cases, small number for cases normalized by population
+            minValueToPlot = 0.0001 // 1 for cases, small number for cases normalized by population
             yAxisFormat = "4.4e" //for cases over population
             
             yLabel = "Cases / Population"
