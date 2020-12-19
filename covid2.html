@@ -371,7 +371,7 @@
             // ================================================================================
             // Variables that apply to all charts
             // ================================================================================
-            var maxY = 300
+            var maxY = 400
 
 
             // ================================================================================
@@ -380,7 +380,7 @@
             var dataFilename = "time_series_covid19_confirmed_global.csv"
             //var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
 
-            var thresholdToPlot = 400000
+            var thresholdToPlot = 500000
             var thresholdToNormalize = 10000
             var normalize = true
             
@@ -400,11 +400,11 @@
             //var dataFilename = "time_series_covid19_confirmed_global.csv"
             var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
 
-            var thresholdToPlot = 0.0200
-            var thresholdToNormalize = 0.001
+            var thresholdToPlot = 0.0300
+            var thresholdToNormalize = 0.005
             var normalize = true
             
-            minValueToPlot = 0.001 // 1 for cases, small number for cases normalized by population
+            minValueToPlot = 0.005 // 1 for cases, small number for cases normalized by population
             yAxisFormat = "4.4e" //for cases over population
             
             yLabel = "Cases / Population"
@@ -421,7 +421,7 @@
             var dataFilename = "time_series_covid19_deaths_global.csv"
             //var dataFilename = "time_series_covid19_confirmed_global_over_pop.csv"
 
-            var thresholdToPlot = 10000
+            var thresholdToPlot = 20000
             var thresholdToNormalize = 1000
             var normalize = true
             
@@ -441,11 +441,11 @@
             // ================================================================================
             var dataFilename = "time_series_covid19_deaths_global_over_pop.csv"
 
-            var thresholdToPlot = 0.0006
-            var thresholdToNormalize = 0.0001
+            var thresholdToPlot = 0.0008
+            var thresholdToNormalize = 0.0002
             var normalize = true
             
-            minValueToPlot = 0.00001 // 1 for cases, small number for cases normalized by population
+            minValueToPlot = 0.00002 // 1 for cases, small number for cases normalized by population
             yAxisFormat = "4.4e" //for cases over population
             
             yLabel = "Deaths / Population"
